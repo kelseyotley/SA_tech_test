@@ -6,7 +6,7 @@
 import json
 import requests
 
-# klaviyo = KlaviyoAPI("pk_49039be2e8792692c8a0533dfb3653a222", max_delay=60, max_retries=3, test_host=None)
+# klaviyo = KlaviyoAPI("api-key", max_delay=60, max_retries=3, test_host=None)
 api_key = "YOUR-PRIVATE-API-KEY"
 url = "https://a.klaviyo.com/api/metric-aggregates/"
 
