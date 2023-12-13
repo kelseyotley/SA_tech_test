@@ -1,0 +1,106 @@
+
+# from klaviyo_api import KlaviyoAPI
+# from openapi_client.models.event_create_query_v2 import EventCreateQueryV2
+
+
+import json
+import requests
+
+# klaviyo = KlaviyoAPI("pk_49039be2e8792692c8a0533dfb3653a222", max_delay=60, max_retries=3, test_host=None)
+api_key = "pk_49039be2e8792692c8a0533dfb3653a222"
+url = "https://a.klaviyo.com/api/metric-aggregates/"
+
+#Get Metric Aggregates on Booked Appointments in last week 
+
+def getBookings(api_key):
+  GetBookingPayload = json.dumps({
+      "data": {
+          "type": "metric-aggregate",
+          "attributes": {
+              "measurements": ["count", "sum_value"],
+              "filter": [
+                  "greater-or-equal(datetime,2023-12-04T05:00:00)",
+                  "less-than(datetime,2023-12-11T05:00:00)"
+              ],
+              "metric_id":
+              "TXTqRb",
+              "interval":
+              "week",
+              "timezone":
+              "US/Eastern"
+          }
+      }
+  })
+  headers = {
+      'revision': '2023-10-15',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': f'Klaviyo-API-Key {api_key}'
+  }
+  
+  response = requests.request("POST", url, headers=headers, data=GetBookingPayload)
+  
+  print(response.text)
+  return response
+
+#Transform booking data into new reporting event in klaviyo
+
+def transformBooking(response):
+  response_json = response.json()
+  WeeklyReportPayload = {
+      "data": {
+          "type": "event",
+          "attributes": {
+              "properties": {
+                  "AppointmentCount":
+                  response_json['data']['attributes']['data'][0]['measurements']['count'][0],
+                  "AppointmentValue":
+                  response_json['data']['attributes']['data'][0]['measurements']['sum_value'][0],
+              },
+              "metric": {
+                  "data": {
+                      "type": "metric",
+                      "attributes": {
+                          "name": "Weekly Booking Report"
+                      }
+                  }
+              },
+              "profile": {
+                  "data": {
+                      "type": "profile",
+                      "attributes": {
+                          "email": "kelseyklaviyo@gmail.com",
+                          "properties": {}
+                      },
+                      "id": "01G784FY21D0SE17GJCAEZGZ99"
+                  }
+              },
+              "time": "2023-12-11T00:00:00",
+              "value": response_json['data']['attributes']['data'][0]['measurements']['sum_value'][0]
+          }
+      }
+  }
+  print(WeeklyReportPayload)
+  return WeeklyReportPayload
+  
+# Sending the transformed payload with metric aggregates as values
+
+def create_event(payload):
+  data = json.dumps(payload)
+  url = "https://a.klaviyo.com/api/events/"
+  headers = {
+      'revision': '2023-10-15',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': f'Klaviyo-API-Key {api_key}'
+  }
+  
+  response = requests.request("POST", url, headers=headers, data=data)
+
+  print(response.text)
+
+# Create and use the WeeklyReport
+
+response = getBookings(api_key)
+weekly_report_data = transformBooking(response)
+create_event(weekly_report_data)
