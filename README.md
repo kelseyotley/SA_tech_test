@@ -18,7 +18,7 @@ As a first step, this solution will allow users to query the count and sum of ke
 4. Create/determine klaviyo profile (email address will act as conduit to trigger the Weekly Report Flow)
 5. Replace the following variables in your script:
 ##### Variable:
-      a. "api_key" - this is your private API key. You can create in Klaviyo > Accounts > Settings > API keys
+      a. "my_secret" - this is your private API key. You can create in Klaviyo > Accounts > Settings > API keys. Then input as a secret in Replit.
 
 ##### GetBookingPayload:
       a. "measurements" - choose preference for reporting measurements (ex: counts, sum_value)
